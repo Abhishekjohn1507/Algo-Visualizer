@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rotate an Array Visualizer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 1rem;
+        }
+        .container {
+            max-width: 900px;
+            width: 100%;
+            background-color: white;
+            padding: 2.5rem;
+            border-radius: 1.5rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+        .array-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 2rem;
+            flex-wrap: wrap;
+        }
+        .array-element {
+            min-width: 4rem;
+            height: 4rem;
+            background-color: #e2e8f0;
+            border-radius: 0.5rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: 600;
+            font-size: 1.5rem;
+            transition: all 0.5s ease-in-out;
+            position: relative;
+        }
+        .highlight {
+            border: 3px solid #38a169;
+            box-shadow: 0 0 10px rgba(56, 161, 105, 0.7);
+        }
+        .pointer {
+            position: absolute;
+            top: -2.5rem;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.875rem;
+            color: #4a5568;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        .pointer-line {
+            position: absolute;
+            top: -1.25rem;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 2px;
+            height: 1.25rem;
+            background-color: #4a5568;
+        }
+        .controls-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+        .input-group {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+        .control-button {
+            padding: 0.75rem 1.5rem;
+            border-radius: 9999px;
+            font-weight: 600;
+            transition: all 0.2s ease-in-out;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .control-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+        }
+        .btn-primary {
+            background-color: #4299e1;
+            color: white;
+        }
+        .btn-primary:hover {
+            background-color: #3182ce;
+        }
+        .btn-secondary {
+            background-color: #a0aec0;
+            color: white;
+        }
+        .btn-secondary:hover {
+            background-color: #718096;
+        }
+        .btn-disabled {
+            background-color: #e2e8f0;
+            color: #a0aec0;
+            cursor: not-allowed;
+        }
+        .message-box {
+            background-color: #e9f5ff;
+            color: #2b6cb0;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            margin-top: 1.5rem;
+            text-align: center;
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+
+    <div class="container">
+        <h1 class="text-3xl font-bold text-center text-gray-800">Rotate an Array</h1>
+        <p class="text-center text-gray-500 mt-2">Visualization of the three-step reversal algorithm</p>
+
+        <div id="algo-container" class="array-container"></div>
+        
+        <div class="controls-container">
+            <div class="input-group">
+                <label for="d-input" class="text-gray-600 font-medium">Rotation Count (d):</label>
+                <input type="number" id="d-input" value="2" min="0" class="w-16 px-2 py-1 border border-gray-300 rounded-lg text-center">
+            </div>
+            <div class="flex gap-4">
+                <button id="step-button" class="control-button btn-primary">Step</button>
+                <button id="reset-button" class="control-button btn-secondary">Reset</button>
+                <a href="index.html" class="control-button btn-secondary">Back to Menu</a>
+            </div>
+        </div>
+
+        <div id="message-box" class="message-box"></div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const initialArr = [1, 2, 3, 4, 5, 6, 7];
+            let state = {
+                arr: [],
+                d: 0,
+                n: 0,
+                phase: 0, // 0: init, 1: reverse first d, 2: reverse rest, 3: reverse all
+                subArrStart: 0,
+                subArrEnd: 0,
+                i: 0,
+                j: 0,
+                isComplete: false,
+                stepCount: 0
+            };
+
+            const algoContainer = document.getElementById('algo-container');
+            const stepButton = document.getElementById('step-button');
+            const resetButton = document.getElementById('reset-button');
+            const messageBox = document.getElementById('message-box');
+            const dInput = document.getElementById('d-input');
+
+            const renderArray = (highlightedIndex1 = -1, highlightedIndex2 = -1) => {
+                algoContainer.innerHTML = '';
+                state.arr.forEach((value, index) => {
+                    const element = document.createElement('div');
+                    element.className = 'array-element';
+                    element.innerHTML = value;
+
+                    if (index === highlightedIndex1 || index === highlightedIndex2) {
+                        element.classList.add('highlight');
+                    }
+                    if (index === state.i && state.phase > 0 && state.i < state.j) {
+                         const pointer = document.createElement('div');
+                         pointer.className = 'pointer';
+                         pointer.textContent = 'start';
+                         element.appendChild(pointer);
+                    }
+                    if (index === state.j && state.phase > 0 && state.i < state.j) {
+                        const pointer = document.createElement('div');
+                        pointer.className = 'pointer';
+                        pointer.textContent = 'end';
+                        element.appendChild(pointer);
+                    }
+                    
+                    algoContainer.appendChild(element);
+                });
+            };
+
+            const updateMessage = (msg) => {
+                messageBox.textContent = msg;
+            };
+
+            const reverseSubarray = () => {
+                if (state.i < state.j) {
+                    const temp = state.arr[state.i];
+                    state.arr[state.i] = state.arr[state.j];
+                    state.arr[state.j] = temp;
+                    
+                    updateMessage(`Step: Swapping elements at index ${state.i} and ${state.j}.`);
+
+                    state.i++;
+                    state.j--;
+                    renderArray(state.i - 1, state.j + 1);
+                } else {
+                    state.phase++;
+                    state.i = 0;
+                    state.j = 0;
+                    if (state.phase === 2) {
+                        state.i = state.d;
+                        state.j = state.n - 1;
+                        updateMessage(`Phase 2: Reversing elements from index ${state.i} to ${state.j}.`);
+                    } else if (state.phase === 3) {
+                        state.i = 0;
+                        state.j = state.n - 1;
+                        updateMessage(`Phase 3: Reversing the entire array from index ${state.i} to ${state.j}.`);
+                    } else {
+                        state.isComplete = true;
+                        updateMessage(`Visualization complete! Array rotated by ${dInput.value}.`);
+                        stepButton.disabled = true;
+                        stepButton.classList.add('btn-disabled');
+                        stepButton.classList.remove('btn-primary');
+                    }
+                    renderArray();
+                }
+            };
+
+            const runStep = () => {
+                if (state.isComplete) {
+                    return;
+                }
+
+                if (state.phase === 0) {
+                    state.phase = 1;
+                    state.d = Number(dInput.value) % state.n;
+                    state.i = 0;
+                    state.j = state.d - 1;
+                    updateMessage(`Starting Phase 1: Reversing the first ${state.d} elements from index ${state.i} to ${state.j}.`);
+                    renderArray();
+                } else {
+                    reverseSubarray();
+                }
+            };
+
+            const resetVisualization = () => {
+                stepButton.disabled = false;
+                stepButton.classList.remove('btn-disabled');
+                stepButton.classList.add('btn-primary');
+                state.arr = [...initialArr];
+                state.n = state.arr.length;
+                state.isComplete = false;
+                state.stepCount = 0;
+                state.phase = 0;
+                state.i = 0;
+                state.j = 0;
+                updateMessage("Click 'Step' to begin the array rotation visualization.");
+                renderArray();
+            };
+
+            stepButton.addEventListener('click', runStep);
+            resetButton.addEventListener('click', resetVisualization);
+
+            dInput.addEventListener('input', () => {
+                 resetVisualization();
+            });
+
+            resetVisualization();
+        });
+    </script>
+</body>
+</html>
