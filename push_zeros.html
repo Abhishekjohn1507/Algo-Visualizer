@@ -6,253 +6,949 @@
     <title>Push Zeros to End Visualizer</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --primary: #6366f1;
+            --secondary: #06b6d4;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --purple: #8b5cf6;
+            --dark: #0f172a;
+            --card-bg: rgba(255, 255, 255, 0.05);
+        }
+        
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f0f4f8;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 25%, #16213e 50%, #0f172a 100%);
             min-height: 100vh;
-            padding: 1rem;
+            color: white;
+            overflow-x: hidden;
+            padding: 2rem;
+            position: relative;
         }
-        .container {
-            max-width: 900px;
+        
+        /* Animated background */
+        .background-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
             width: 100%;
-            background-color: white;
-            padding: 2.5rem;
-            border-radius: 1.5rem;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+            opacity: 0.1;
         }
+        
+        .floating-orb {
+            position: absolute;
+            border-radius: 50%;
+            background: radial-gradient(circle, var(--primary), transparent);
+            animation: floatOrb 8s ease-in-out infinite;
+        }
+        
+        @keyframes floatOrb {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            25% { transform: translate(50px, -30px) scale(1.1); }
+            50% { transform: translate(-30px, 50px) scale(0.9); }
+            75% { transform: translate(30px, 20px) scale(1.05); }
+        }
+        
+        .container {
+            max-width: 1200px;
+            width: 100%;
+            margin: 0 auto;
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            border-radius: 3rem;
+            padding: 3rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 
+                0 20px 50px rgba(0, 0, 0, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            position: relative;
+            z-index: 10;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+        
+        .header h1 {
+            font-size: clamp(2rem, 4vw, 3.5rem);
+            font-weight: 900;
+            background: linear-gradient(135deg, #6366f1, #06b6d4, #10b981);
+            background-size: 200% 200%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: gradientFlow 4s ease-in-out infinite;
+            margin-bottom: 1rem;
+            letter-spacing: -0.02em;
+        }
+        
+        @keyframes gradientFlow {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+        
+        .header p {
+            color: #94a3b8;
+            font-size: 1.1rem;
+            font-weight: 500;
+        }
+        
+        .algorithm-info {
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            border-radius: 1.5rem;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            backdrop-filter: blur(10px);
+        }
+        
+        .algorithm-info h3 {
+            color: #6366f1;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+        }
+        
+        .algorithm-info p {
+            color: #cbd5e1;
+            line-height: 1.6;
+            font-size: 0.95rem;
+        }
+        
         .array-container {
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: 0.5rem;
-            margin-top: 2rem;
+            gap: 1rem;
+            margin: 3rem 0;
             flex-wrap: wrap;
+            min-height: 150px;
+            position: relative;
         }
+        
         .array-element {
-            width: 4rem;
-            height: 4rem;
-            background-color: #e2e8f0;
-            border-radius: 0.5rem;
+            width: 5rem;
+            height: 5rem;
+            border-radius: 1.5rem;
             display: flex;
             justify-content: center;
             align-items: center;
-            font-weight: 600;
+            font-weight: 700;
             font-size: 1.5rem;
-            transition: all 0.5s ease-in-out;
+            transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             position: relative;
+            cursor: pointer;
+            overflow: hidden;
+            transform-style: preserve-3d;
         }
+        
+        .array-element::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.6s ease;
+        }
+        
+        .array-element:hover::before {
+            left: 100%;
+        }
+        
+        .array-element.default {
+            background: linear-gradient(135deg, #374151, #4b5563);
+            color: #d1d5db;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+        }
+        
         .array-element.zero {
-            background-color: #fbd38d;
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: white;
+            border: 2px solid rgba(245, 158, 11, 0.3);
+            box-shadow: 0 8px 25px rgba(245, 158, 11, 0.3);
         }
+        
         .array-element.non-zero {
-            background-color: #b9fbc7;
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            border: 2px solid rgba(16, 185, 129, 0.3);
+            box-shadow: 0 8px 25px rgba(16, 185, 129, 0.3);
         }
-        .highlight {
-            border: 3px solid #38a169;
-            box-shadow: 0 0 10px rgba(56, 161, 105, 0.7);
+        
+        .array-element.current {
+            transform: scale(1.15) rotateY(10deg);
+            border: 3px solid #6366f1;
+            box-shadow: 
+                0 0 30px rgba(99, 102, 241, 0.6),
+                0 15px 35px rgba(99, 102, 241, 0.2);
+            z-index: 10;
         }
+        
+        .array-element.moving {
+            transform: scale(1.1) translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+        
         .pointer {
             position: absolute;
-            top: -2.5rem;
+            top: -3.5rem;
             left: 50%;
             transform: translateX(-50%);
-            font-size: 0.875rem;
-            color: #4a5568;
-            font-weight: 600;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 1rem;
+            font-size: 0.8rem;
+            font-weight: 700;
             white-space: nowrap;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+            animation: pointerBounce 2s ease-in-out infinite;
         }
-        .pointer-line {
+        
+        @keyframes pointerBounce {
+            0%, 100% { transform: translateX(-50%) translateY(0); }
+            50% { transform: translateX(-50%) translateY(-5px); }
+        }
+        
+        .pointer::after {
+            content: '';
             position: absolute;
-            top: -1.25rem;
+            top: 100%;
             left: 50%;
             transform: translateX(-50%);
-            width: 2px;
-            height: 1.25rem;
-            background-color: #4a5568;
+            width: 0;
+            height: 0;
+            border-left: 8px solid transparent;
+            border-right: 8px solid transparent;
+            border-top: 8px solid #6366f1;
         }
+        
         .controls-container {
             display: flex;
             justify-content: center;
+            gap: 1.5rem;
+            margin-top: 3rem;
+            flex-wrap: wrap;
+        }
+        
+        .control-button {
+            padding: 1rem 2.5rem;
+            border-radius: 9999px;
+            font-weight: 700;
+            font-size: 1rem;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            cursor: pointer;
+            border: none;
+            position: relative;
+            overflow: hidden;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .control-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.6s ease;
+        }
+        
+        .control-button:hover::before {
+            left: 100%;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: white;
+            box-shadow: 0 8px 25px rgba(99, 102, 241, 0.3);
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 15px 35px rgba(99, 102, 241, 0.4);
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(135deg, #64748b, #475569);
+            color: white;
+            box-shadow: 0 8px 25px rgba(100, 116, 139, 0.3);
+        }
+        
+        .btn-secondary:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 15px 35px rgba(100, 116, 139, 0.4);
+        }
+        
+        .btn-auto {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            box-shadow: 0 8px 25px rgba(16, 185, 129, 0.3);
+        }
+        
+        .btn-auto:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 15px 35px rgba(16, 185, 129, 0.4);
+        }
+        
+        .btn-disabled {
+            background: linear-gradient(135deg, #374151, #4b5563);
+            color: #9ca3af;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+        
+        .btn-disabled:hover {
+            transform: none;
+        }
+        
+        .message-box {
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            backdrop-filter: blur(10px);
+            color: #e2e8f0;
+            padding: 1.5rem;
+            border-radius: 1.5rem;
+            margin-top: 2rem;
+            text-align: center;
+            font-weight: 500;
+            line-height: 1.6;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .message-box::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary), var(--success));
+            background-size: 200% 100%;
+            animation: messageGlow 3s ease-in-out infinite;
+        }
+        
+        @keyframes messageGlow {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+        
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .stat-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 1.5rem;
+            padding: 1.5rem;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        
+        .stat-card:hover {
+            background: rgba(255, 255, 255, 0.08);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+        
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-label {
+            color: #94a3b8;
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .input-section {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 1.5rem;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .input-section h3 {
+            color: white;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+        }
+        
+        .input-row {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .custom-input {
+            flex: 1;
+            min-width: 250px;
+            padding: 1rem;
+            border-radius: 1rem;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.05);
+            color: white;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .custom-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 20px rgba(99, 102, 241, 0.3);
+            background: rgba(255, 255, 255, 0.08);
+        }
+        
+        .custom-input::placeholder {
+            color: #64748b;
+        }
+        
+        .phase-indicator {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+        
+        .phase {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem 1.5rem;
+            border-radius: 1.5rem;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            background: var(--card-bg);
+            transition: all 0.4s ease;
+            font-weight: 600;
+        }
+        
+        .phase.active {
+            border-color: var(--primary);
+            background: rgba(99, 102, 241, 0.2);
+            box-shadow: 0 0 25px rgba(99, 102, 241, 0.3);
+            transform: scale(1.05);
+        }
+        
+        .phase-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #64748b;
+            transition: all 0.4s ease;
+        }
+        
+        .phase.active .phase-dot {
+            background: var(--primary);
+            box-shadow: 0 0 10px var(--primary);
+            animation: pulse 2s ease-in-out infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+        }
+        
+        .code-display {
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 1.5rem;
+            padding: 2rem;
+            margin-top: 2rem;
+            font-family: 'Monaco', 'Menlo', monospace;
+            color: #e2e8f0;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            overflow-x: auto;
+        }
+        
+        .code-highlight {
+            background: rgba(99, 102, 241, 0.2);
+            padding: 0.2rem 0.5rem;
+            border-radius: 0.5rem;
+            margin: 0.2rem 0;
+            border-left: 3px solid var(--primary);
+            animation: codeGlow 1s ease-in-out;
+        }
+        
+        @keyframes codeGlow {
+            0% { background: rgba(99, 102, 241, 0.4); }
+            100% { background: rgba(99, 102, 241, 0.2); }
+        }
+        
+        .complexity-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 1rem;
             margin-top: 2rem;
         }
-        .control-button {
-            padding: 0.75rem 1.5rem;
-            border-radius: 9999px;
-            font-weight: 600;
-            transition: all 0.2s ease-in-out;
-            cursor: pointer;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-        .control-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
-        }
-        .btn-primary {
-            background-color: #4299e1;
-            color: white;
-        }
-        .btn-primary:hover {
-            background-color: #3182ce;
-        }
-        .btn-secondary {
-            background-color: #a0aec0;
-            color: white;
-        }
-        .btn-secondary:hover {
-            background-color: #718096;
-        }
-        .btn-disabled {
-            background-color: #e2e8f0;
-            color: #a0aec0;
-            cursor: not-allowed;
-        }
-        .message-box {
-            background-color: #e9f5ff;
-            color: #2b6cb0;
-            padding: 1rem;
-            border-radius: 0.75rem;
-            margin-top: 1.5rem;
+        
+        .complexity-card {
+            background: var(--card-bg);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 1rem;
+            padding: 1.5rem;
             text-align: center;
+            transition: all 0.3s ease;
+        }
+        
+        .complexity-card:hover {
+            background: rgba(255, 255, 255, 0.08);
+            transform: translateY(-3px);
+        }
+        
+        .complexity-title {
+            color: #94a3b8;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .complexity-value {
+            color: var(--success);
+            font-size: 1.5rem;
+            font-weight: 800;
+            font-family: 'Monaco', monospace;
+        }
+        
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 2rem;
+                margin: 1rem;
+                border-radius: 2rem;
+            }
+            
+            .array-element {
+                width: 4rem;
+                height: 4rem;
+                font-size: 1.2rem;
+            }
+            
+            .controls-container {
+                gap: 1rem;
+            }
+            
+            .control-button {
+                padding: 0.875rem 2rem;
+                font-size: 0.9rem;
+            }
+            
+            .phase-indicator {
+                flex-direction: column;
+                gap: 1rem;
+            }
+        }
+        
+        /* Success animation */
+        .success-animation {
+            animation: successPulse 0.8s ease-in-out;
+        }
+        
+        @keyframes successPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); box-shadow: 0 0 30px rgba(16, 185, 129, 0.5); }
+            100% { transform: scale(1); }
+        }
+        
+        /* Loading animation for auto mode */
+        .loading {
+            position: relative;
+        }
+        
+        .loading::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top: 2px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: translate(-50%, -50%) rotate(0deg); }
+            100% { transform: translate(-50%, -50%) rotate(360deg); }
         }
     </style>
 </head>
-<body class="bg-gray-100">
+<body>
+    <!-- Animated background -->
+    <div class="background-animation" id="background"></div>
 
     <div class="container">
-        <h1 class="text-3xl font-bold text-center text-gray-800">Push Zeros to End</h1>
-        <p class="text-center text-gray-500 mt-2">Visualization of the two-pointer algorithm</p>
+        <header class="header">
+            <h1>Push Zeros to End</h1>
+            <p>Master the two-pointer technique with stunning visualizations</p>
+        </header>
+
+        <div class="algorithm-info">
+            <h3>🎯 Algorithm Overview</h3>
+            <p>This algorithm efficiently moves all zeros to the end of an array while maintaining the relative order of non-zero elements. It uses a two-pointer approach: one pointer tracks non-zero elements, while we iterate through the array.</p>
+        </div>
+
+        <div class="input-section">
+            <h3>🔧 Customize Your Array</h3>
+            <div class="input-row">
+                <input type="text" id="custom-array" class="custom-input" placeholder="Enter numbers separated by commas (e.g., 1,0,2,0,3,4,0,5)" value="1,2,0,4,3,0,5,0">
+                <button id="apply-array" class="control-button btn-secondary">Apply Array</button>
+                <button id="generate-random" class="control-button btn-secondary">Random Array</button>
+            </div>
+        </div>
+
+        <div class="stats-container">
+            <div class="stat-card">
+                <div class="stat-value" id="step-count">0</div>
+                <div class="stat-label">Steps</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="comparisons">0</div>
+                <div class="stat-label">Operations</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="zeros-count">0</div>
+                <div class="stat-label">Zeros Found</div>
+            </div>
+        </div>
+
+        <div class="phase-indicator">
+            <div class="phase active" id="phase1">
+                <div class="phase-dot"></div>
+                <span>Phase 1: Collect Non-Zeros</span>
+            </div>
+            <div class="phase" id="phase2">
+                <div class="phase-dot"></div>
+                <span>Phase 2: Fill with Zeros</span>
+            </div>
+        </div>
 
         <div id="array-container" class="array-container"></div>
         
         <div class="controls-container">
-            <button id="step-button" class="control-button btn-primary">Step</button>
-            <button id="reset-button" class="control-button btn-secondary">Reset</button>
+            <button id="step-button" class="control-button btn-primary">
+                <span>Next Step</span>
+            </button>
+            <button id="auto-button" class="control-button btn-auto">
+                <span>Auto Play</span>
+            </button>
+            <button id="reset-button" class="control-button btn-secondary">
+                <span>Reset</span>
+            </button>
+            <a href="index.html" class="control-button btn-secondary">Back to Menu</a>
         </div>
 
         <div id="message-box" class="message-box">
-            Click 'Step' to begin the visualization.
+            Ready to begin! Click 'Next Step' to start the visualization or 'Auto Play' for continuous animation.
+        </div>
+
+        <div class="code-display">
+            <div id="code-content">
+<span class="code-line" id="line-1"><span style="color: #8b5cf6;">function</span> <span style="color: #06b6d4;">pushZerosToEnd</span>(<span style="color: #f59e0b;">arr</span>) {</span>
+<span class="code-line" id="line-2">    <span style="color: #8b5cf6;">let</span> <span style="color: #f59e0b;">nonZeroCount</span> = <span style="color: #10b981;">0</span>;</span>
+<span class="code-line" id="line-3">    </span>
+<span class="code-line" id="line-4">    <span style="color: #64748b;">// Phase 1: Move all non-zero elements to front</span></span>
+<span class="code-line" id="line-5">    <span style="color: #8b5cf6;">for</span> (<span style="color: #8b5cf6;">let</span> <span style="color: #f59e0b;">i</span> = <span style="color: #10b981;">0</span>; <span style="color: #f59e0b;">i</span> < <span style="color: #f59e0b;">arr.length</span>; <span style="color: #f59e0b;">i</span>++) {</span>
+<span class="code-line" id="line-6">        <span style="color: #8b5cf6;">if</span> (<span style="color: #f59e0b;">arr[i]</span> !== <span style="color: #10b981;">0</span>) {</span>
+<span class="code-line" id="line-7">            <span style="color: #f59e0b;">arr[nonZeroCount]</span> = <span style="color: #f59e0b;">arr[i]</span>;</span>
+<span class="code-line" id="line-8">            <span style="color: #f59e0b;">nonZeroCount</span>++;</span>
+<span class="code-line" id="line-9">        }</span>
+<span class="code-line" id="line-10">    }</span>
+<span class="code-line" id="line-11">    </span>
+<span class="code-line" id="line-12">    <span style="color: #64748b;">// Phase 2: Fill remaining positions with zeros</span></span>
+<span class="code-line" id="line-13">    <span style="color: #8b5cf6;">for</span> (<span style="color: #8b5cf6;">let</span> <span style="color: #f59e0b;">i</span> = <span style="color: #f59e0b;">nonZeroCount</span>; <span style="color: #f59e0b;">i</span> < <span style="color: #f59e0b;">arr.length</span>; <span style="color: #f59e0b;">i</span>++) {</span>
+<span class="code-line" id="line-14">        <span style="color: #f59e0b;">arr[i]</span> = <span style="color: #10b981;">0</span>;</span>
+<span class="code-line" id="line-15">    }</span>
+<span class="code-line" id="line-16">}</span>
+            </div>
+        </div>
+
+        <div class="complexity-info">
+            <div class="complexity-card">
+                <div class="complexity-title">Time Complexity</div>
+                <div class="complexity-value">O(n)</div>
+            </div>
+            <div class="complexity-card">
+                <div class="complexity-title">Space Complexity</div>
+                <div class="complexity-value">O(1)</div>
+            </div>
+            <div class="complexity-card">
+                <div class="complexity-title">Approach</div>
+                <div class="complexity-value">Two-Pointer</div>
+            </div>
         </div>
     </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const initialArr = [1, 2, 0, 4, 3, 0, 5, 0];
-            let arr = [...initialArr];
+            let arr = [];
+            let originalArr = [];
             let nonZeroCount = 0;
             let i = 0;
             let step = 0;
-            let phase = 1; // 1 for non-zero pass, 2 for zero fill
+            let phase = 1;
+            let isAutoPlaying = false;
+            let autoInterval;
+            let operations = 0;
+            let zerosFound = 0;
 
             const arrayContainer = document.getElementById('array-container');
             const stepButton = document.getElementById('step-button');
+            const autoButton = document.getElementById('auto-button');
             const resetButton = document.getElementById('reset-button');
             const messageBox = document.getElementById('message-box');
+            const customArrayInput = document.getElementById('custom-array');
+            const applyArrayButton = document.getElementById('apply-array');
+            const generateRandomButton = document.getElementById('generate-random');
+            
+            const stepCountEl = document.getElementById('step-count');
+            const operationsEl = document.getElementById('comparisons');
+            const zerosCountEl = document.getElementById('zeros-count');
+            
+            const phase1El = document.getElementById('phase1');
+            const phase2El = document.getElementById('phase2');
+            const codeContent = document.getElementById('code-content');
+
+            function updateMessage(message) {
+                messageBox.textContent = message;
+            }
+
+            // Create animated background
+            function createBackground() {
+                const background = document.getElementById('background');
+                for (let j = 0; j < 8; j++) {
+                    const orb = document.createElement('div');
+                    orb.className = 'floating-orb';
+                    orb.style.width = orb.style.height = Math.random() * 100 + 50 + 'px';
+                    orb.style.left = Math.random() * 100 + '%';
+                    orb.style.top = Math.random() * 100 + '%';
+                    orb.style.animationDelay = Math.random() * 8 + 's';
+                    orb.style.animationDuration = Math.random() * 6 + 8 + 's';
+                    background.appendChild(orb);
+                }
+            }
+
+            function updateStats() {
+                stepCountEl.textContent = step;
+                operationsEl.textContent = operations;
+                zerosCountEl.textContent = zerosFound;
+            }
+
+            function updatePhaseIndicator() {
+                phase1El.classList.toggle('active', phase === 1);
+                phase2El.classList.toggle('active', phase === 2);
+            }
+
+            function highlightCode(lineNumbers) {
+                document.querySelectorAll('.code-line').forEach(el => el.classList.remove('code-highlight'));
+                if (lineNumbers) {
+                    lineNumbers.forEach(lineNum => {
+                        const lineEl = document.getElementById(`line-${lineNum}`);
+                        if (lineEl) {
+                            lineEl.classList.add('code-highlight');
+                        }
+                    });
+                }
+            }
 
             function renderArray() {
                 arrayContainer.innerHTML = '';
                 arr.forEach((value, index) => {
                     const element = document.createElement('div');
-                    element.className = 'array-element';
-                    element.innerHTML = value;
-
-                    if (value === 0) {
-                        element.classList.add('zero');
-                    } else {
-                        element.classList.add('non-zero');
-                    }
-
-                    if (index === i && phase === 1) {
-                        element.classList.add('highlight');
+                    element.className = `array-element ${value === 0 ? 'zero' : 'non-zero'}`;
+                    element.textContent = value;
+                    if (index === i) {
+                        element.classList.add('current');
+                        const pointerI = document.createElement('div');
+                        pointerI.className = 'pointer';
+                        pointerI.innerHTML = '<span>i</span>';
+                        element.appendChild(pointerI);
                     }
                     if (index === nonZeroCount && phase === 1) {
-                         const pointer = document.createElement('div');
-                         pointer.className = 'pointer';
-                         pointer.textContent = 'nonZeroCount';
-                         const pointerLine = document.createElement('div');
-                         pointerLine.className = 'pointer-line';
-                         element.appendChild(pointer);
-                         element.appendChild(pointerLine);
-                    }
-                     if (index === nonZeroCount && phase === 2) {
-                         const pointer = document.createElement('div');
-                         pointer.className = 'pointer';
-                         pointer.textContent = 'nonZeroCount';
-                         const pointerLine = document.createElement('div');
-                         pointerLine.className = 'pointer-line';
-                         element.appendChild(pointer);
-                         element.appendChild(pointerLine);
+                         const pointerNZC = document.createElement('div');
+                         pointerNZC.className = 'pointer';
+                         pointerNZC.innerHTML = '<span>nonZeroCount</span>';
+                         pointerNZC.style.top = '-5.5rem';
+                         element.appendChild(pointerNZC);
                     }
                     arrayContainer.appendChild(element);
                 });
             }
 
-            function updateMessage(msg) {
-                messageBox.textContent = msg;
+            function parseInputArray(input) {
+                return input.split(',').map(s => parseInt(s.trim(), 10)).filter(n => !isNaN(n));
             }
 
             function runStep() {
                 if (phase === 1) {
-                    // First pass: moving non-zeros
+                    operations++;
                     if (i < arr.length) {
-                        updateMessage(`Step ${step + 1}: Checking element at index ${i} (value: ${arr[i]}).`);
+                        highlightCode([5, 6]);
+                        updateMessage(`Checking element at index ${i}: ${arr[i]}.`);
+                        
                         if (arr[i] !== 0) {
-                            const originalValue = arr[i];
-                            const tempArr = [...arr];
-                            tempArr[nonZeroCount] = originalValue;
-                            arr = tempArr;
-                            updateMessage(`Step ${step + 1}: Found a non-zero value (${originalValue}). Placing it at index ${nonZeroCount} and incrementing nonZeroCount.`);
+                            highlightCode([6, 7, 8]);
+                            updateMessage(`Non-zero element found! Copying ${arr[i]} to position of nonZeroCount pointer (${arr[nonZeroCount]}).`);
+                            arr[nonZeroCount] = arr[i];
                             nonZeroCount++;
+                            renderArray();
+                        } else {
+                            updateMessage(`Zero element found at index ${i}. Skipping.`);
                         }
+                        
                         i++;
-                    } else {
-                        phase = 2;
-                        i = nonZeroCount; // Reset i for the next phase
-                        updateMessage(`Phase 1 complete. Non-zero elements are at the beginning. Starting Phase 2: Filling the rest with zeros.`);
-                    }
-                } else if (phase === 2) {
-                    // Second pass: filling with zeros
-                    if (nonZeroCount < arr.length) {
-                        arr[nonZeroCount] = 0;
-                        updateMessage(`Step ${step + 1}: Filling index ${nonZeroCount} with a zero.`);
-                        nonZeroCount++;
-                    } else {
-                        updateMessage(`Visualization complete! The array is sorted with all zeros at the end.`);
-                        stepButton.disabled = true;
-                        stepButton.classList.add('btn-disabled');
-                        stepButton.classList.remove('btn-primary');
-                    }
-                }
+                        step++;
+                        updateStats();
 
-                if (phase === 1 && i < arr.length || phase === 2 && nonZeroCount < arr.length) {
-                    step++;
+                    } else {
+                        updateMessage(`Phase 1 complete. Non-zero elements have been moved to the front.`);
+                        phase = 2;
+                        i = nonZeroCount;
+                        highlightCode([13]);
+                        updatePhaseIndicator();
+                        renderArray(); // Re-render to clear i pointer from end of first pass
+                    }
+
+                } else if (phase === 2) {
+                    operations++;
+                    if (i < arr.length) {
+                        highlightCode([13, 14]);
+                        updateMessage(`Filling element at index ${i} with 0.`);
+                        arr[i] = 0;
+                        i++;
+                        step++;
+                        updateStats();
+                        renderArray();
+                    } else {
+                        updateMessage(`Visualization complete! All zeros have been pushed to the end.`);
+                        stepButton.disabled = true;
+                        autoButton.disabled = true;
+                        stepButton.classList.add('btn-disabled');
+                        autoButton.classList.add('btn-disabled');
+                        highlightCode(null);
+                        stopAutoPlay();
+                    }
                 }
-                
-                renderArray();
             }
 
-            function resetVisualization() {
-                arr = [...initialArr];
+            function resetVisualization(newArr = initialArr) {
+                stopAutoPlay();
+                arr = [...newArr];
+                originalArr = [...newArr];
                 nonZeroCount = 0;
                 i = 0;
                 step = 0;
                 phase = 1;
+                operations = 0;
+                zerosFound = newArr.filter(x => x === 0).length;
+                
+                stepButton.disabled = false;
+                autoButton.disabled = false;
+                stepButton.classList.remove('btn-disabled');
+                autoButton.classList.remove('btn-disabled');
+                
+                renderArray();
+                updateStats();
+                updatePhaseIndicator();
+                updateMessage("Click 'Next Step' to start the visualization or 'Auto Play' for continuous animation.");
+                highlightCode(null);
+            }
+
+            function startAutoPlay() {
+                if (isAutoPlaying) return;
+                isAutoPlaying = true;
+                autoButton.innerHTML = '<span>Pause</span>';
+                autoButton.classList.remove('btn-auto');
+                autoButton.classList.add('btn-secondary');
+                stepButton.disabled = true;
+                stepButton.classList.add('btn-disabled');
+                autoInterval = setInterval(() => {
+                    if (i < arr.length || (phase === 2 && i < arr.length)) {
+                        runStep();
+                    } else {
+                        stopAutoPlay();
+                    }
+                }, 1000);
+            }
+
+            function stopAutoPlay() {
+                if (!isAutoPlaying) return;
+                isAutoPlaying = false;
+                autoButton.innerHTML = '<span>Auto Play</span>';
+                autoButton.classList.remove('btn-secondary');
+                autoButton.classList.add('btn-auto');
                 stepButton.disabled = false;
                 stepButton.classList.remove('btn-disabled');
-                stepButton.classList.add('btn-primary');
-                updateMessage("Click 'Step' to begin the visualization.");
-                renderArray();
+                clearInterval(autoInterval);
             }
 
             stepButton.addEventListener('click', runStep);
-            resetButton.addEventListener('click', resetVisualization);
+            autoButton.addEventListener('click', () => {
+                if (isAutoPlaying) {
+                    stopAutoPlay();
+                } else {
+                    startAutoPlay();
+                }
+            });
+            resetButton.addEventListener('click', () => resetVisualization(parseInputArray(customArrayInput.value)));
+            
+            applyArrayButton.addEventListener('click', () => {
+                const newArr = parseInputArray(customArrayInput.value);
+                if (newArr.length > 0) {
+                    resetVisualization(newArr);
+                } else {
+                    updateMessage("Please enter a valid, comma-separated list of numbers.");
+                }
+            });
+            
+            generateRandomButton.addEventListener('click', () => {
+                const newArr = Array.from({length: 10}, () => Math.floor(Math.random() * 5));
+                customArrayInput.value = newArr.join(',');
+                resetVisualization(newArr);
+            });
 
-            // Initial render
-            renderArray();
+            createBackground();
+            resetVisualization();
         });
     </script>
 </body>

@@ -6,122 +6,666 @@
     <title>Algorithm Visualizer</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary: #06b6d4;
+            --accent: #f59e0b;
+            --success: #10b981;
+            --danger: #ef4444;
+            --dark: #0f172a;
+            --light: #f8fafc;
+        }
+        
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #e2e8f0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 25%, #16213e 50%, #0f172a 100%);
             min-height: 100vh;
-            padding: 1.5rem;
+            color: white;
+            overflow-x: hidden;
+            position: relative;
         }
-        .container {
-            max-width: 960px;
+        
+        /* Animated background particles */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
             width: 100%;
-            background-color: white;
-            padding: 3rem;
-            border-radius: 2rem;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
         }
+        
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(99, 102, 241, 0.3);
+            border-radius: 50%;
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); opacity: 0.3; }
+            50% { transform: translateY(-20px) rotate(180deg); opacity: 0.8; }
+        }
+        
+        .container {
+            max-width: 1400px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 3rem;
+            position: relative;
+            z-index: 10;
+        }
+        
         .header {
             text-align: center;
-            margin-bottom: 3rem;
+            margin-bottom: 5rem;
+            position: relative;
         }
+        
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(circle, rgba(99, 102, 241, 0.2) 0%, transparent 70%);
+            border-radius: 50%;
+            animation: pulse 3s ease-in-out infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: translateX(-50%) scale(1); opacity: 0.5; }
+            50% { transform: translateX(-50%) scale(1.2); opacity: 0.8; }
+        }
+        
+        .header h1 {
+            font-size: clamp(2.5rem, 5vw, 4.5rem);
+            font-weight: 900;
+            background: linear-gradient(135deg, #6366f1 0%, #06b6d4 25%, #f59e0b 50%, #10b981 75%, #ef4444 100%);
+            background-size: 300% 300%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: gradientShift 8s ease-in-out infinite;
+            letter-spacing: -0.02em;
+            line-height: 1.1;
+            text-shadow: 0 0 30px rgba(99, 102, 241, 0.3);
+        }
+        
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+        
+        .header p {
+            font-size: 1.25rem;
+            color: #cbd5e1;
+            margin-top: 1.5rem;
+            line-height: 1.7;
+            font-weight: 400;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            opacity: 0;
+            animation: fadeInUp 1s ease-out 0.5s forwards;
+        }
+        
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
         .menu-grid {
             display: grid;
-            gap: 2rem;
-            grid-template-columns: repeat(1, minmax(0, 1fr));
+            gap: 2.5rem;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            animation: fadeInUp 1s ease-out 0.8s both;
         }
-        @media (min-width: 768px) {
-            .menu-grid {
-                grid-template-columns: repeat(3, minmax(0, 1fr));
-            }
-        }
+        
         .menu-card {
-            background-color: #f7fafc;
-            border-radius: 1.5rem;
-            padding: 2rem;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-            transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
-            border: 1px solid #e2e8f0;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border-radius: 2rem;
+            padding: 2.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
+            min-height: 280px;
         }
+        
+        .menu-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            transform: scaleX(0);
+            transition: transform 0.4s ease;
+            transform-origin: left;
+        }
+        
+        .menu-card:hover::before {
+            transform: scaleX(1);
+        }
+        
+        .menu-card::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(99, 102, 241, 0.1) 0%, transparent 50%);
+            transition: all 0.4s ease;
+            opacity: 0;
+        }
+        
+        .menu-card:hover::after {
+            opacity: 1;
+            top: -25%;
+            right: -25%;
+        }
+        
         .menu-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 12px 20px rgba(0, 0, 0, 0.1);
+            transform: translateY(-15px) scale(1.02);
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(99, 102, 241, 0.3);
+            box-shadow: 
+                0 25px 50px rgba(0, 0, 0, 0.3),
+                0 0 40px rgba(99, 102, 241, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
         }
-        .menu-card h2 {
-            font-size: 1.75rem;
-            font-weight: 700;
-            color: #2d3748;
-            margin-bottom: 0.75rem;
-        }
-        .menu-card p {
-            font-size: 1rem;
-            color: #4a5568;
+        
+        .card-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 1rem;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
             margin-bottom: 1.5rem;
-            line-height: 1.6;
-            flex-grow: 1;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
         }
-        .visualize-btn {
-            background-color: #4c51bf;
+        
+        .card-icon::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.6s ease;
+        }
+        
+        .menu-card:hover .card-icon::before {
+            left: 100%;
+        }
+        
+        .menu-card:hover .card-icon {
+            transform: rotate(5deg) scale(1.1);
+            box-shadow: 0 10px 20px rgba(99, 102, 241, 0.4);
+        }
+        
+        .menu-card h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
             color: white;
-            padding: 0.75rem 1.5rem;
-            border-radius: 9999px;
-            font-weight: 600;
-            text-align: center;
-            transition: background-color 0.3s ease-in-out, transform 0.2s ease-in-out;
+            margin-bottom: 1rem;
+            transition: color 0.3s ease;
         }
+        
+        .menu-card:hover h2 {
+            background: linear-gradient(45deg, #6366f1, #06b6d4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .menu-card p {
+            font-size: 0.95rem;
+            color: #94a3b8;
+            margin-bottom: 2rem;
+            line-height: 1.7;
+            flex-grow: 1;
+            transition: color 0.3s ease;
+        }
+        
+        .menu-card:hover p {
+            color: #cbd5e1;
+        }
+        
+        .visualize-btn {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #06b6d4 100%);
+            background-size: 200% 200%;
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 9999px;
+            font-weight: 700;
+            text-align: center;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: none;
+            text-decoration: none;
+            display: inline-block;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 8px 25px rgba(99, 102, 241, 0.3);
+        }
+        
+        .visualize-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.6s ease;
+        }
+        
+        .visualize-btn:hover::before {
+            left: 100%;
+        }
+        
         .visualize-btn:hover {
-            background-color: #434190;
-            transform: scale(1.02);
+            background-position: 100% 0%;
+            transform: scale(1.05);
+            box-shadow: 
+                0 15px 35px rgba(99, 102, 241, 0.4),
+                0 0 30px rgba(139, 92, 246, 0.3);
+        }
+        
+        .visualize-btn:active {
+            transform: scale(0.98);
+        }
+        
+        /* Algorithm-specific icons using CSS */
+        .icon-array { color: #f59e0b; }
+        .icon-sort { color: #10b981; }
+        .icon-search { color: #06b6d4; }
+        .icon-number { color: #ef4444; }
+        .icon-reverse { color: #8b5cf6; }
+        .icon-rotate { color: #f97316; }
+        
+        /* Floating elements animation */
+        .floating-shapes {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 2;
+        }
+        
+        .shape {
+            position: absolute;
+            background: rgba(99, 102, 241, 0.1);
+            border-radius: 50%;
+            animation: floatRandom 15s linear infinite;
+        }
+        
+        @keyframes floatRandom {
+            0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 0.3; }
+            90% { opacity: 0.3; }
+            100% { transform: translateY(-100px) rotate(360deg); opacity: 0; }
+        }
+        
+        /* Responsive improvements */
+        @media (max-width: 768px) {
+            .container {
+                padding: 2rem;
+            }
+            
+            .menu-grid {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+            
+            .menu-card {
+                padding: 2rem;
+                min-height: 250px;
+            }
+        }
+        
+        /* Scroll reveal animation */
+        .reveal {
+            opacity: 0;
+            transform: translateY(50px);
+            transition: all 0.8s ease-out;
+        }
+        
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        /* Enhanced hover effects */
+        .glow-on-hover {
+            position: relative;
+        }
+        
+        .glow-on-hover::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, #6366f1, #06b6d4, #10b981, #f59e0b, #ef4444, #8b5cf6);
+            background-size: 300% 300%;
+            border-radius: 2rem;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            animation: gradientShift 3s ease infinite;
+            z-index: -1;
+        }
+        
+        .glow-on-hover:hover::before {
+            opacity: 0.7;
         }
     </style>
 </head>
-<body class="bg-gray-100">
+<body>
+    <!-- Animated background particles -->
+    <div class="particles" id="particles"></div>
+    
+    <!-- Floating shapes -->
+    <div class="floating-shapes" id="floating-shapes"></div>
 
     <div class="container">
         <header class="header">
-            <h1 class="text-5xl font-bold text-gray-800">Explore Algorithms</h1>
-            <p class="text-xl text-gray-500 mt-4">Interactive visualizations to help you learn and understand fundamental data structures and algorithms.</p>
+            <h1 class="reveal">Algorithm Visualizer</h1>
+            <p class="reveal">Discover the beauty of algorithms through stunning interactive visualizations. Watch as complex concepts come to life with smooth animations and intuitive controls.</p>
         </header>
 
         <main class="menu-grid">
-            <div class="menu-card">
+            <div class="menu-card glow-on-hover reveal">
+                <div class="card-icon icon-array">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M3 4h18v2H3zm0 4h18v2H3zm0 4h18v2H3zm0 4h12v2H3z"/>
+                    </svg>
+                </div>
                 <h2>Push Zeros to End</h2>
-                <p>A simple algorithm that demonstrates in-place array manipulation by moving all zero elements to the end of the array.</p>
-                <a href="push_zeros.html" class="visualize-btn">Visualize</a>
+                <p>Master in-place array manipulation as you watch zeros gracefully move to the end while maintaining the relative order of non-zero elements.</p>
+                <a href="push_zeros.html" class="visualize-btn">Explore Algorithm</a>
             </div>
-            <div class="menu-card">
+            
+            <div class="menu-card glow-on-hover reveal">
+                <div class="card-icon icon-sort">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M3 18h6v-2H3v2zM3 6v2h18V6H3zm0 7h12v-2H3v2z"/>
+                    </svg>
+                </div>
                 <h2>Bubble Sort</h2>
-                <p>A beginner-friendly sorting algorithm that repeatedly steps through the list, compares adjacent elements, and swaps them if they are in the wrong order.</p>
-                <a href="bubble_sort.html" class="visualize-btn">Visualize</a>
+                <p>Experience the mesmerizing dance of bubble sort as elements bubble up to their correct positions through elegant comparisons and swaps.</p>
+                <a href="bubble_sort.html" class="visualize-btn">Explore Algorithm</a>
             </div>
-            <div class="menu-card">
+            
+            <div class="menu-card glow-on-hover reveal">
+                <div class="card-icon icon-search">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+                    </svg>
+                </div>
                 <h2>Binary Search</h2>
-                <p>An efficient searching algorithm for finding an item from a sorted list by repeatedly dividing the search interval in half.</p>
-                <a href="binary_search.html" class="visualize-btn">Visualize</a>
+                <p>Witness the power of divide-and-conquer as binary search efficiently navigates through sorted data with logarithmic precision.</p>
+                <a href="binary_search.html" class="visualize-btn">Explore Algorithm</a>
             </div>
-              <div class="menu-card">
+            
+            <div class="menu-card glow-on-hover reveal">
+                <div class="card-icon icon-number">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
+                    </svg>
+                </div>
                 <h2>Second Largest Element</h2>
-                <p>An algorithm to find the second largest element in an array.</p>
-                <a href="second_largest.html" class="visualize-btn">Visualize</a>
+                <p>Discover elegant techniques for finding the second largest element with optimal time complexity and minimal comparisons.</p>
+                <a href="second_largest.html" class="visualize-btn">Explore Algorithm</a>
             </div>
-                          <div class="menu-card">
-                <h2>Reverse Array</h2>
-                <p>An algorithm that reverses the elements of an array in place, demonstrating array manipulation techniques.</p>
-                <a href="reverse_array.html" class="visualize-btn">Visualize</a>
+            
+            <div class="menu-card glow-on-hover reveal">
+                <div class="card-icon icon-reverse">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M9 3L5 6.99h3V14h2V6.99h3L9 3zm7 14.01V11h-2v6.01h-3L15 21l4-3.99h-3z"/>
+                    </svg>
+                </div>
+                <h2>Reverse an Array</h2>
+                <p>Watch the elegant symmetry as array elements swap positions in a beautiful choreographed reversal using two-pointer technique.</p>
+                <a href="reverse_array.html" class="visualize-btn">Explore Algorithm</a>
             </div>
-                    <div class="menu-card">
-                <h2>Rotation of Array</h2>
-                <p>An algorithm that rotate the elements of an array in place, demonstrating array manipulation techniques.</p>
-                <a href="array_rotate.html" class="visualize-btn">Visualize</a>
+            
+            <div class="menu-card glow-on-hover reveal">
+                <div class="card-icon icon-rotate">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 6v3l4-4-4-4v3c-4.42 0-8 3.58-8 8 0 1.57.46 3.03 1.24 4.26L6.7 14.8c-.45-.83-.7-1.79-.7-2.8 0-3.31 2.69-6 6-6zm6.76 1.74L17.3 9.2c.44.84.7 1.79.7 2.8 0 3.31-2.69 6-6 6v-3l-4 4 4 4v-3c4.42 0 8-3.58 8-8 0-1.57-.46-3.03-1.24-4.26z"/>
+                    </svg>
+                </div>
+                <h2>Array Rotation</h2>
+                <p>Experience the fluid motion of array rotation as elements shift positions in perfect harmony, showcasing multiple rotation techniques.</p>
+                <a href="array_rotate.html" class="visualize-btn">Explore Algorithm</a>
             </div>
         </main>
     </div>
 
+    <script>
+        // Create animated particles
+        function createParticles() {
+            const particlesContainer = document.getElementById('particles');
+            const particleCount = 50;
+            
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.top = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 6 + 's';
+                particle.style.animationDuration = (Math.random() * 4 + 4) + 's';
+                particlesContainer.appendChild(particle);
+            }
+        }
+        
+        // Create floating shapes
+        function createFloatingShapes() {
+            const shapesContainer = document.getElementById('floating-shapes');
+            
+            setInterval(() => {
+                const shape = document.createElement('div');
+                shape.className = 'shape';
+                shape.style.left = Math.random() * 100 + '%';
+                shape.style.width = shape.style.height = Math.random() * 20 + 10 + 'px';
+                shape.style.animationDuration = Math.random() * 10 + 10 + 's';
+                shape.style.opacity = Math.random() * 0.3 + 0.1;
+                
+                shapesContainer.appendChild(shape);
+                
+                // Remove shape after animation
+                setTimeout(() => {
+                    shape.remove();
+                }, 15000);
+            }, 2000);
+        }
+        
+        // Scroll reveal animation
+        function revealOnScroll() {
+            const reveals = document.querySelectorAll('.reveal');
+            
+            reveals.forEach((element, index) => {
+                setTimeout(() => {
+                    element.classList.add('active');
+                }, index * 200);
+            });
+        }
+        
+        // Enhanced hover effects for cards
+        function addCardEffects() {
+            const cards = document.querySelectorAll('.menu-card');
+            
+            cards.forEach(card => {
+                card.addEventListener('mouseenter', (e) => {
+                    // Add ripple effect
+                    const ripple = document.createElement('div');
+                    const rect = card.getBoundingClientRect();
+                    const size = Math.max(rect.width, rect.height);
+                    const x = e.clientX - rect.left - size / 2;
+                    const y = e.clientY - rect.top - size / 2;
+                    
+                    ripple.style.cssText = `
+                        position: absolute;
+                        width: ${size}px;
+                        height: ${size}px;
+                        left: ${x}px;
+                        top: ${y}px;
+                        background: radial-gradient(circle, rgba(99, 102, 241, 0.3) 0%, transparent 70%);
+                        border-radius: 50%;
+                        transform: scale(0);
+                        animation: ripple 0.6s ease-out;
+                        pointer-events: none;
+                        z-index: 1;
+                    `;
+                    
+                    card.appendChild(ripple);
+                    
+                    setTimeout(() => ripple.remove(), 600);
+                });
+            });
+        }
+        
+        // Add ripple animation keyframes
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes ripple {
+                to {
+                    transform: scale(2);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+        
+        // Mouse movement parallax effect
+        function addParallaxEffect() {
+            document.addEventListener('mousemove', (e) => {
+                const cards = document.querySelectorAll('.menu-card');
+                const x = e.clientX / window.innerWidth;
+                const y = e.clientY / window.innerHeight;
+                
+                cards.forEach((card, index) => {
+                    const intensity = (index % 2 === 0) ? 10 : -10;
+                    const translateX = (x - 0.5) * intensity;
+                    const translateY = (y - 0.5) * intensity;
+                    
+                    card.style.transform = `translate(${translateX}px, ${translateY}px)`;
+                });
+            });
+        }
+        
+        // Enhanced button interactions
+        function enhanceButtons() {
+            const buttons = document.querySelectorAll('.visualize-btn');
+            
+            buttons.forEach(button => {
+                button.addEventListener('click', (e) => {
+                    // Create explosion effect
+                    for (let i = 0; i < 12; i++) {
+                        const spark = document.createElement('div');
+                        const angle = (i / 12) * Math.PI * 2;
+                        const velocity = 100;
+                        
+                        spark.style.cssText = `
+                            position: absolute;
+                            width: 4px;
+                            height: 4px;
+                            background: #6366f1;
+                            border-radius: 50%;
+                            left: 50%;
+                            top: 50%;
+                            pointer-events: none;
+                            animation: spark 0.8s ease-out forwards;
+                            transform: translate(-50%, -50%);
+                        `;
+                        
+                        spark.style.setProperty('--dx', Math.cos(angle) * velocity + 'px');
+                        spark.style.setProperty('--dy', Math.sin(angle) * velocity + 'px');
+                        
+                        button.appendChild(spark);
+                        setTimeout(() => spark.remove(), 800);
+                    }
+                });
+            });
+        }
+        
+        // Add spark animation
+        const sparkStyle = document.createElement('style');
+        sparkStyle.textContent = `
+            @keyframes spark {
+                0% {
+                    transform: translate(-50%, -50%) scale(1);
+                    opacity: 1;
+                }
+                100% {
+                    transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(0);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(sparkStyle);
+        
+        // Initialize all effects
+        document.addEventListener('DOMContentLoaded', () => {
+            createParticles();
+            createFloatingShapes();
+            revealOnScroll();
+            addCardEffects();
+            addParallaxEffect();
+            enhanceButtons();
+        });
+        
+        // Smooth scrolling for better UX
+        document.documentElement.style.scrollBehavior = 'smooth';
+        
+        // Dynamic card colors based on algorithm type
+        const cardColors = [
+            ['#f59e0b', '#f97316'], // Push Zeros - Orange
+            ['#10b981', '#059669'], // Bubble Sort - Green
+            ['#06b6d4', '#0891b2'], // Binary Search - Cyan
+            ['#ef4444', '#dc2626'], // Second Largest - Red
+            ['#8b5cf6', '#7c3aed'], // Reverse Array - Purple
+            ['#f97316', '#ea580c']  // Array Rotation - Orange-Red
+        ];
+        
+        // Apply dynamic colors to cards
+        document.addEventListener('DOMContentLoaded', () => {
+            const cards = document.querySelectorAll('.menu-card');
+            cards.forEach((card, index) => {
+                const [color1, color2] = cardColors[index % cardColors.length];
+                const icon = card.querySelector('.card-icon');
+                icon.style.background = `linear-gradient(135deg, ${color1}, ${color2})`;
+            });
+        });
+    </script>
 </body>
 </html>
