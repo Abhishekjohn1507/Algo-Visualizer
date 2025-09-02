@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Algorithm Visualizer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #e2e8f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 1.5rem;
+        }
+        .container {
+            max-width: 960px;
+            width: 100%;
+            background-color: white;
+            padding: 3rem;
+            border-radius: 2rem;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+        .menu-grid {
+            display: grid;
+            gap: 2rem;
+            grid-template-columns: repeat(1, minmax(0, 1fr));
+        }
+        @media (min-width: 768px) {
+            .menu-grid {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+            }
+        }
+        .menu-card {
+            background-color: #f7fafc;
+            border-radius: 1.5rem;
+            padding: 2rem;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+            border: 1px solid #e2e8f0;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .menu-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 20px rgba(0, 0, 0, 0.1);
+        }
+        .menu-card h2 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: #2d3748;
+            margin-bottom: 0.75rem;
+        }
+        .menu-card p {
+            font-size: 1rem;
+            color: #4a5568;
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+            flex-grow: 1;
+        }
+        .visualize-btn {
+            background-color: #4c51bf;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 9999px;
+            font-weight: 600;
+            text-align: center;
+            transition: background-color 0.3s ease-in-out, transform 0.2s ease-in-out;
+        }
+        .visualize-btn:hover {
+            background-color: #434190;
+            transform: scale(1.02);
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+
+    <div class="container">
+        <header class="header">
+            <h1 class="text-5xl font-bold text-gray-800">Explore Algorithms</h1>
+            <p class="text-xl text-gray-500 mt-4">Interactive visualizations to help you learn and understand fundamental data structures and algorithms.</p>
+        </header>
+
+        <main class="menu-grid">
+            <div class="menu-card">
+                <h2>Push Zeros to End</h2>
+                <p>A simple algorithm that demonstrates in-place array manipulation by moving all zero elements to the end of the array.</p>
+                <a href="push_zeros.html" class="visualize-btn">Visualize</a>
+            </div>
+            <div class="menu-card">
+                <h2>Bubble Sort</h2>
+                <p>A beginner-friendly sorting algorithm that repeatedly steps through the list, compares adjacent elements, and swaps them if they are in the wrong order.</p>
+                <a href="bubble_sort.html" class="visualize-btn">Visualize</a>
+            </div>
+            <div class="menu-card">
+                <h2>Binary Search</h2>
+                <p>An efficient searching algorithm for finding an item from a sorted list by repeatedly dividing the search interval in half.</p>
+                <a href="binary_search.html" class="visualize-btn">Visualize</a>
+            </div>
+              <div class="menu-card">
+                <h2>Second Largest Element</h2>
+                <p>An algorithm to find the second largest element in an array.</p>
+                <a href="second_largest.html" class="visualize-btn">Visualize</a>
+            </div>
+        </main>
+    </div>
+
+</body>
+</html>

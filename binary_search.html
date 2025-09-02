@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Binary Search Visualizer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 1rem;
+        }
+        .container {
+            max-width: 900px;
+            width: 100%;
+            background-color: white;
+            padding: 2.5rem;
+            border-radius: 1.5rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+        .array-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 2rem;
+            flex-wrap: wrap;
+        }
+        .array-element {
+            min-width: 4rem;
+            height: 4rem;
+            background-color: #e2e8f0;
+            border-radius: 0.5rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: 600;
+            font-size: 1.5rem;
+            transition: all 0.5s ease-in-out;
+            position: relative;
+        }
+        .highlight {
+            border: 3px solid #38a169;
+            box-shadow: 0 0 10px rgba(56, 161, 105, 0.7);
+        }
+        .highlight-secondary {
+            border: 3px solid #a0aec0;
+            box-shadow: 0 0 10px rgba(160, 174, 192, 0.7);
+        }
+        .pointer {
+            position: absolute;
+            top: -2.5rem;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.875rem;
+            color: #4a5568;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        .pointer-line {
+            position: absolute;
+            top: -1.25rem;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 2px;
+            height: 1.25rem;
+            background-color: #4a5568;
+        }
+        .controls-container {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+        .control-button {
+            padding: 0.75rem 1.5rem;
+            border-radius: 9999px;
+            font-weight: 600;
+            transition: all 0.2s ease-in-out;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .control-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+        }
+        .btn-primary {
+            background-color: #4299e1;
+            color: white;
+        }
+        .btn-primary:hover {
+            background-color: #3182ce;
+        }
+        .btn-secondary {
+            background-color: #a0aec0;
+            color: white;
+        }
+        .btn-secondary:hover {
+            background-color: #718096;
+        }
+        .btn-disabled {
+            background-color: #e2e8f0;
+            color: #a0aec0;
+            cursor: not-allowed;
+        }
+        .message-box {
+            background-color: #e9f5ff;
+            color: #2b6cb0;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            margin-top: 1.5rem;
+            text-align: center;
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+
+    <div class="container">
+        <h1 class="text-3xl font-bold text-center text-gray-800">Binary Search</h1>
+        <p class="text-center text-gray-500 mt-2">Visualization of the searching algorithm</p>
+
+        <div id="algo-container" class="array-container"></div>
+        
+        <div class="controls-container">
+            <button id="step-button" class="control-button btn-primary">Step</button>
+            <button id="reset-button" class="control-button btn-secondary">Reset</button>
+            <a href="index.html" class="control-button btn-secondary">Back to Menu</a>
+        </div>
+
+        <div id="message-box" class="message-box"></div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const initialArr = [2, 5, 8, 12, 16, 23, 38, 56, 72, 91];
+            const target = 23;
+            let state = {
+                arr: [],
+                target: target,
+                low: 0,
+                high: 0,
+                mid: 0,
+                found: false
+            };
+
+            const algoContainer = document.getElementById('algo-container');
+            const stepButton = document.getElementById('step-button');
+            const resetButton = document.getElementById('reset-button');
+            const messageBox = document.getElementById('message-box');
+
+            const renderArray = (highlightedIndex = -1) => {
+                algoContainer.innerHTML = '';
+                state.arr.forEach((value, index) => {
+                    const element = document.createElement('div');
+                    element.className = 'array-element';
+                    element.innerHTML = value;
+
+                    if (index === highlightedIndex) {
+                        element.classList.add('highlight');
+                    }
+                    if (index === state.low) {
+                        const pointer = document.createElement('div');
+                        pointer.className = 'pointer';
+                        pointer.textContent = 'low';
+                        element.appendChild(pointer);
+                    }
+                    if (index === state.high) {
+                        const pointer = document.createElement('div');
+                        pointer.className = 'pointer';
+                        pointer.textContent = 'high';
+                        element.appendChild(pointer);
+                    }
+                    if (index === state.mid) {
+                        const pointer = document.createElement('div');
+                        pointer.className = 'pointer';
+                        pointer.textContent = 'mid';
+                        element.appendChild(pointer);
+                    }
+                    algoContainer.appendChild(element);
+                });
+            };
+
+            const updateMessage = (msg) => {
+                messageBox.textContent = msg;
+            };
+
+            const runStep = () => {
+                const arr = state.arr;
+                const low = state.low;
+                const high = state.high;
+                const target = state.target;
+
+                if (state.found) {
+                    updateMessage(`Target ${target} found at index ${state.mid}. Visualization complete!`);
+                    stepButton.disabled = true;
+                    stepButton.classList.add('btn-disabled');
+                    stepButton.classList.remove('btn-primary');
+                    return;
+                }
+
+                if (low <= high) {
+                    const mid = Math.floor((low + high) / 2);
+                    state.mid = mid;
+                    updateMessage(`Step: Searching between index ${low} and ${high}. The middle element is at index ${mid} with value ${arr[mid]}.`);
+                    
+                    if (arr[mid] === target) {
+                        state.found = true;
+                        updateMessage(`Success! Target ${target} found at index ${mid}.`);
+                        stepButton.disabled = true;
+                        stepButton.classList.add('btn-disabled');
+                        stepButton.classList.remove('btn-primary');
+                    } else if (arr[mid] < target) {
+                        state.low = mid + 1;
+                        updateMessage(`Value at mid (${arr[mid]}) is less than target (${target}). Adjusting low to ${state.low}.`);
+                    } else {
+                        state.high = mid - 1;
+                        updateMessage(`Value at mid (${arr[mid]}) is greater than target (${target}). Adjusting high to ${state.high}.`);
+                    }
+                } else {
+                    updateMessage(`Target ${target} was not found in the array. Visualization complete.`);
+                    stepButton.disabled = true;
+                    stepButton.classList.add('btn-disabled');
+                    stepButton.classList.remove('btn-primary');
+                }
+                renderArray(state.mid);
+            };
+
+            const resetVisualization = () => {
+                stepButton.disabled = false;
+                stepButton.classList.remove('btn-disabled');
+                stepButton.classList.add('btn-primary');
+                state.arr = [...initialArr];
+                state.low = 0;
+                state.high = state.arr.length - 1;
+                state.mid = 0;
+                state.found = false;
+                updateMessage(`Click 'Step' to begin the binary search for the target value: ${state.target}.`);
+                renderArray();
+            };
+
+            stepButton.addEventListener('click', runStep);
+            resetButton.addEventListener('click', resetVisualization);
+
+            resetVisualization();
+        });
+    </script>
+</body>
+</html>

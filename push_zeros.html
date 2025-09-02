@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Push Zeros to End Visualizer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 1rem;
+        }
+        .container {
+            max-width: 900px;
+            width: 100%;
+            background-color: white;
+            padding: 2.5rem;
+            border-radius: 1.5rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+        .array-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 2rem;
+            flex-wrap: wrap;
+        }
+        .array-element {
+            width: 4rem;
+            height: 4rem;
+            background-color: #e2e8f0;
+            border-radius: 0.5rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: 600;
+            font-size: 1.5rem;
+            transition: all 0.5s ease-in-out;
+            position: relative;
+        }
+        .array-element.zero {
+            background-color: #fbd38d;
+        }
+        .array-element.non-zero {
+            background-color: #b9fbc7;
+        }
+        .highlight {
+            border: 3px solid #38a169;
+            box-shadow: 0 0 10px rgba(56, 161, 105, 0.7);
+        }
+        .pointer {
+            position: absolute;
+            top: -2.5rem;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.875rem;
+            color: #4a5568;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        .pointer-line {
+            position: absolute;
+            top: -1.25rem;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 2px;
+            height: 1.25rem;
+            background-color: #4a5568;
+        }
+        .controls-container {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+        .control-button {
+            padding: 0.75rem 1.5rem;
+            border-radius: 9999px;
+            font-weight: 600;
+            transition: all 0.2s ease-in-out;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .control-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+        }
+        .btn-primary {
+            background-color: #4299e1;
+            color: white;
+        }
+        .btn-primary:hover {
+            background-color: #3182ce;
+        }
+        .btn-secondary {
+            background-color: #a0aec0;
+            color: white;
+        }
+        .btn-secondary:hover {
+            background-color: #718096;
+        }
+        .btn-disabled {
+            background-color: #e2e8f0;
+            color: #a0aec0;
+            cursor: not-allowed;
+        }
+        .message-box {
+            background-color: #e9f5ff;
+            color: #2b6cb0;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            margin-top: 1.5rem;
+            text-align: center;
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+
+    <div class="container">
+        <h1 class="text-3xl font-bold text-center text-gray-800">Push Zeros to End</h1>
+        <p class="text-center text-gray-500 mt-2">Visualization of the two-pointer algorithm</p>
+
+        <div id="array-container" class="array-container"></div>
+        
+        <div class="controls-container">
+            <button id="step-button" class="control-button btn-primary">Step</button>
+            <button id="reset-button" class="control-button btn-secondary">Reset</button>
+        </div>
+
+        <div id="message-box" class="message-box">
+            Click 'Step' to begin the visualization.
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const initialArr = [1, 2, 0, 4, 3, 0, 5, 0];
+            let arr = [...initialArr];
+            let nonZeroCount = 0;
+            let i = 0;
+            let step = 0;
+            let phase = 1; // 1 for non-zero pass, 2 for zero fill
+
+            const arrayContainer = document.getElementById('array-container');
+            const stepButton = document.getElementById('step-button');
+            const resetButton = document.getElementById('reset-button');
+            const messageBox = document.getElementById('message-box');
+
+            function renderArray() {
+                arrayContainer.innerHTML = '';
+                arr.forEach((value, index) => {
+                    const element = document.createElement('div');
+                    element.className = 'array-element';
+                    element.innerHTML = value;
+
+                    if (value === 0) {
+                        element.classList.add('zero');
+                    } else {
+                        element.classList.add('non-zero');
+                    }
+
+                    if (index === i && phase === 1) {
+                        element.classList.add('highlight');
+                    }
+                    if (index === nonZeroCount && phase === 1) {
+                         const pointer = document.createElement('div');
+                         pointer.className = 'pointer';
+                         pointer.textContent = 'nonZeroCount';
+                         const pointerLine = document.createElement('div');
+                         pointerLine.className = 'pointer-line';
+                         element.appendChild(pointer);
+                         element.appendChild(pointerLine);
+                    }
+                     if (index === nonZeroCount && phase === 2) {
+                         const pointer = document.createElement('div');
+                         pointer.className = 'pointer';
+                         pointer.textContent = 'nonZeroCount';
+                         const pointerLine = document.createElement('div');
+                         pointerLine.className = 'pointer-line';
+                         element.appendChild(pointer);
+                         element.appendChild(pointerLine);
+                    }
+                    arrayContainer.appendChild(element);
+                });
+            }
+
+            function updateMessage(msg) {
+                messageBox.textContent = msg;
+            }
+
+            function runStep() {
+                if (phase === 1) {
+                    // First pass: moving non-zeros
+                    if (i < arr.length) {
+                        updateMessage(`Step ${step + 1}: Checking element at index ${i} (value: ${arr[i]}).`);
+                        if (arr[i] !== 0) {
+                            const originalValue = arr[i];
+                            const tempArr = [...arr];
+                            tempArr[nonZeroCount] = originalValue;
+                            arr = tempArr;
+                            updateMessage(`Step ${step + 1}: Found a non-zero value (${originalValue}). Placing it at index ${nonZeroCount} and incrementing nonZeroCount.`);
+                            nonZeroCount++;
+                        }
+                        i++;
+                    } else {
+                        phase = 2;
+                        i = nonZeroCount; // Reset i for the next phase
+                        updateMessage(`Phase 1 complete. Non-zero elements are at the beginning. Starting Phase 2: Filling the rest with zeros.`);
+                    }
+                } else if (phase === 2) {
+                    // Second pass: filling with zeros
+                    if (nonZeroCount < arr.length) {
+                        arr[nonZeroCount] = 0;
+                        updateMessage(`Step ${step + 1}: Filling index ${nonZeroCount} with a zero.`);
+                        nonZeroCount++;
+                    } else {
+                        updateMessage(`Visualization complete! The array is sorted with all zeros at the end.`);
+                        stepButton.disabled = true;
+                        stepButton.classList.add('btn-disabled');
+                        stepButton.classList.remove('btn-primary');
+                    }
+                }
+
+                if (phase === 1 && i < arr.length || phase === 2 && nonZeroCount < arr.length) {
+                    step++;
+                }
+                
+                renderArray();
+            }
+
+            function resetVisualization() {
+                arr = [...initialArr];
+                nonZeroCount = 0;
+                i = 0;
+                step = 0;
+                phase = 1;
+                stepButton.disabled = false;
+                stepButton.classList.remove('btn-disabled');
+                stepButton.classList.add('btn-primary');
+                updateMessage("Click 'Step' to begin the visualization.");
+                renderArray();
+            }
+
+            stepButton.addEventListener('click', runStep);
+            resetButton.addEventListener('click', resetVisualization);
+
+            // Initial render
+            renderArray();
+        });
+    </script>
+</body>
+</html>
